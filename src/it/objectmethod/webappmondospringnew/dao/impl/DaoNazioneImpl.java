@@ -10,29 +10,23 @@ import java.util.List;
 
 import javax.sql.DataSource;
 
+import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcDaoSupport;
 
 //import it.objectmethod.webappmondospringnew.config.ConnectionManager;
 import it.objectmethod.webappmondospringnew.dao.IDaoNazione;
 import it.objectmethod.webappmondospringnew.model.Nazione;
 import it.objectmethod.webappmondospringnew.model.mapper.NationMapper;
 
-public class DaoNazioneImpl implements IDaoNazione{
-
-	private DataSource dataSource;
-	private JdbcTemplate jdbcTemplateObject;
-	
-	public void setDataSource(DataSource dataSource) {
-		this.dataSource = dataSource;
-		this.jdbcTemplateObject = new JdbcTemplate(dataSource);
-	}
-	
+public class DaoNazioneImpl extends NamedParameterJdbcDaoSupport implements IDaoNazione{	
 	
 	@Override
 	public List<String> getAllContinents() {
 		List<String> list = new ArrayList<String>();
 		String sql = "SELECT distinct continent FROM country";
-		list = this.jdbcTemplateObject.queryForList(sql,String.class);	
+		list = getJdbcTemplate().queryForList(sql, String.class);	
 		return list;
 	}
 	
@@ -40,8 +34,11 @@ public class DaoNazioneImpl implements IDaoNazione{
 	@Override
 	public List<Nazione> getNationsByContinent(String continente) {
 		List<Nazione> list = new ArrayList<Nazione>();
-		String sql = "SELECT * from country where continent= ?";
-		list = this.jdbcTemplateObject.query(sql, new Object[] {continente}, new NationMapper());
+		String sql = "SELECT * from country where continent= :cont";
+		MapSqlParameterSource params = new MapSqlParameterSource();
+		params.addValue("cont", continente);
+		BeanPropertyRowMapper<Nazione> rm = new BeanPropertyRowMapper<Nazione>(Nazione.class);
+		list = getNamedParameterJdbcTemplate().query(sql, params, rm);
 		return list;
 	}
 	
@@ -50,7 +47,7 @@ public class DaoNazioneImpl implements IDaoNazione{
 	public List<Nazione> allNations() {
 		List<Nazione> list = new ArrayList<Nazione>();
 		String sql = "SELECT * from country";
-		list = this.jdbcTemplateObject.query(sql, new NationMapper());
+		list = getJdbcTemplate().query(sql, new NationMapper());
 		return list;
 	}
 
