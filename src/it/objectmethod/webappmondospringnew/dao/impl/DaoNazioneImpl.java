@@ -18,7 +18,6 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcDaoSupport;
 //import it.objectmethod.webappmondospringnew.config.ConnectionManager;
 import it.objectmethod.webappmondospringnew.dao.IDaoNazione;
 import it.objectmethod.webappmondospringnew.model.Nazione;
-import it.objectmethod.webappmondospringnew.model.mapper.NationMapper;
 
 public class DaoNazioneImpl extends NamedParameterJdbcDaoSupport implements IDaoNazione{	
 	
@@ -47,7 +46,8 @@ public class DaoNazioneImpl extends NamedParameterJdbcDaoSupport implements IDao
 	public List<Nazione> allNations() {
 		List<Nazione> list = new ArrayList<Nazione>();
 		String sql = "SELECT * from country";
-		list = getJdbcTemplate().query(sql, new NationMapper());
+		BeanPropertyRowMapper<Nazione> rm = new BeanPropertyRowMapper<Nazione>(Nazione.class);
+		list = getJdbcTemplate().query(sql, rm);
 		return list;
 	}
 
